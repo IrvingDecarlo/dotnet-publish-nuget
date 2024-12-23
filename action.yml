@@ -39,7 +39,7 @@ runs:
       run: |
         echo -e "\033[36mProcessing .csproj files...\033[0m"
         FAILED_PROJECTS=""
-        PROJECTS=$(echo ${{ input.files-csproj }} | tr ',' '\n')
+        PROJECTS=$(echo ${{ inputs.files-csproj }} | tr ',' '\n')
         for project in $MODIFIED_PROJECTS; do
           echo -e "\033[36mBuilding and packing project: $project\033[0m"
           if dotnet pack --configuration Release --output ./nupkg $project; then
