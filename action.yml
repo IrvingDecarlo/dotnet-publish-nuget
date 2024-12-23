@@ -1,0 +1,78 @@
+name: "Pack and Publish Projects to NuGet"
+description: "Builds, packs and publishes .csproj files as .nupkg to NuGet."
+
+branding:
+  icon: 'git-commit'
+  color: 'orange'
+
+inputs:
+  files-csproj:
+    description: "A comma-separated list of .csproj files to pack and publish."
+    required: true
+  nuget-key:
+    description: "The NuGet.org API token to use for publishing the packages. Register it as a secret in your repository."
+    required: true
+  restore-workloads:
+    description: "Restore the projects' workloads? 1 for 'true', 0 for 'false'. Defaults to false."
+    default: 0
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore Workloads
+      if: ${{ inputs.restore-workloads }}!=0
+      id: workload-restore
+      shell: bash
+      run: |
+        # Restores the workload for all projects.
+        echo -e "\033[36mRestoring workloads for all projects...\033[0m"
+        PROJECTS=$(echo ${{ inputs.files-csproj }} | tr ',' '\n')
+        for project in $PROJECTS; do
+          echo -e "\033[36mRestoring workloads for project $project...\033[0m"
+          dotnet workload restore $project
+        done
+        
+    - name: Build and pack Projects
+      id: pack-projects
+      shell: bash
+      run: |
+        echo -e "\033[36mProcessing .csproj files...\033[0m"
+        FAILED_PROJECTS=""
+        PROJECTS=$(echo ${{ input.files-csproj }} | tr ',' '\n')
+        for project in $MODIFIED_PROJECTS; do
+          echo -e "\033[36mBuilding and packing project: $project\033[0m"
+          if dotnet pack --configuration Release --output ./nupkg $project; then
+            echo -e "\033[32mProject $project packed successfully.\033[0m"
+          else
+            FAILED_PROJECTS="$FAILED_PROJECTS$project,"
+          fi
+        done
+        echo "FAILED_PROJECTS=$FAILED_PROJECTS" >> $GITHUB_ENV
+    
+    - name: Publish packages
+      id: publish-projects
+      shell: bash
+      run: |
+        # Publishes all built packages.
+        echo -e "\033[36mPublishing generated .nupkg files...\033[0m"
+        FAILED_PROJECTS=$(echo ${{ env.FAILED_PROJECTS }})
+        for package in $(find ./nupkg -name '*.nupkg'); do
+          echo -e "\033[36mPublishing file $package...\033[0m"
+          if dotnet nuget push "$package" --api-key ${{ inputs.nuget-key }} --source https://api.nuget.org/v3/index.json --skip-duplicate; then
+            echo -e "\033[32mPackage $package published successfully.\033[0m"
+          else
+            FAILED_PROJECTS="$FAILED_PROJECTS$package,"
+          fi
+        done
+        echo "FAILED_PROJECTS=$FAILED_PROJECTS" >> $GITHUB_ENV
+
+    - name: Output failure
+      if: env.FAILED_PROJECTS != ''
+      id: output-failure
+      shell: bash
+      run: |
+        # Outputs all failed projects in the console and fails the process.
+        FAILED_PROJECTS=$(echo ${{ env.FAILED_PROJECTS }} | sed 's/,$//')
+        echo "::error::The following projects failed to pack/publish: $FAILED_PROJECTS"
+        exit 1
