@@ -2,8 +2,8 @@ name: "Pack and Publish Projects to NuGet"
 description: "Builds, packs and publishes .csproj files as .nupkg to NuGet."
 
 branding:
-  icon: 'git-commit'
-  color: 'orange'
+  icon: 'upload-cloud'
+  color: 'purple'
 
 inputs:
   files-csproj:
