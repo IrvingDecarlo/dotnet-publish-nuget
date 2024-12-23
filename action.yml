@@ -13,15 +13,15 @@ inputs:
     description: "The NuGet.org API token to use for publishing the packages. Register it as a secret in your repository."
     required: true
   restore-workloads:
-    description: "Restore the projects' workloads? 1 for 'true', 0 for 'false'. Defaults to false."
-    default: 0
+    description: "Restore the projects' workloads? Accepts 'true' or 'false'."
+    default: "false"
     required: false
 
 runs:
   using: "composite"
   steps:
     - name: Restore Workloads
-      if: ${{ inputs.restore-workloads }}!=0
+      if: ${{ inputs.restore-workloads }} == "true"
       id: workload-restore
       shell: bash
       run: |
