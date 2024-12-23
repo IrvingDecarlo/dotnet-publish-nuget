@@ -15,9 +15,9 @@ files-csproj: "Example/Example.csproj,Test/Test.csproj"
 ```
 nuget-key: ${{ secrets.NUGET_API_KEY }}
 ```
-3. `restore-workloads`: Restore the projects' workloads? 1 for 'true', 0 for 'false'. Defaults to false:
+3. `restore-workloads`: "Restore the projects' workloads? Accepts 'true' or 'false'. Defaults to 'false' if not specified."
 ```
-restore-workloads: 1
+restore-workloads: 'true'
 ```
 
 It has no outputs.

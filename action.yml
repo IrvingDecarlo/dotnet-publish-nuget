@@ -13,7 +13,7 @@ inputs:
     description: "The NuGet.org API token to use for publishing the packages. Register it as a secret in your repository."
     required: true
   restore-workloads:
-    description: "Restore the projects' workloads? Accepts 'true' or 'false'."
+    description: "Restore the projects' workloads? Accepts 'true' or 'false'. Defaults to 'false' if not specified."
     default: 'false'
     required: false
 
