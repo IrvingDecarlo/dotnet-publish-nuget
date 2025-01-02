@@ -10,11 +10,15 @@ inputs:
     description: "A comma-separated list of .csproj files to pack and publish."
     required: true
   nuget-key:
-    description: "The NuGet.org API token to use for publishing the packages. Register it as a secret in your repository."
+    description: "The NuGet API token to use for publishing the packages. Register it as a secret in your repository."
     required: true
   restore-workloads:
     description: "Restore the projects' workloads? Accepts 'true' or 'false'. Defaults to 'false' if not specified."
     default: 'false'
+    required: false
+  source:
+    description: "The NuGet source file for publishing your packages to. Defaults to nuget.org."
+    default: "https://api.nuget.org/v3/index.json"
     required: false
 
 runs:
